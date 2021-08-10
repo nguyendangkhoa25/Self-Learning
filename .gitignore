@@ -13,6 +13,9 @@
 # Covers JetBrains IDEs: IntelliJ
 .idea/
 
+.DS_Store
+.DS_Store/
+
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
 ### Eclipse ###
