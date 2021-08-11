@@ -14,7 +14,7 @@
   <name>Spring Boot Training Project</name>
   <url>https://github.com/nguyendangkhoa25/Spring-Boot-Training</url>
   <modules>
-    <module>Spring-Component-Scanning</module>
+    <module>Spring-Component-Scan</module>
   </modules>
   <properties>
     <java.version>16</java.version>
