@@ -1,4 +1,4 @@
-# Spring Boot Annotation
+# Spring Boot Annotations
 ## 1. Khái quát
 Khi sử dụng Spring Boot để phát triển một ứng dụng thì chúng ta đã tiết kiệm được khá nhiều thời gian cho việc "configuring" thông qua việc sử dụng tính năng "auto-configure" được cung cấp sẵn trong Spring Boot</br>
 Trong bài viết này chúng ta sẽ tìm hiểu về các annotations trong Spring packages: `org.springframework.boot.autoconfigure và org.springframework.boot.autoconfigure.condition`
@@ -31,10 +31,216 @@ public class PizzaFactoryConfig {
 }
 ```
 ## 4. Auto-Configuration conditions
+Khi chúng ta khởi tạo Spring beans, thì chúng ta có thể thêm vào các điều kiện bằng cách sử dụng các Conditional Annotations, Các bean chỉ được load vào Application Context khi mà các điều kiện chúng ta đặt ra được thoả mãn
 ### 1. @ConditionalOnClass và @ConditionalOnMissingClass
+_@ConditionalOnClass_ cho phép chúng ta chỉ định để Spring tự động cấu hình các beans nếu class tồn tại trong classpath,
+Ví dụ: Class _ConditionalOnClassConfiguration_ và bean _ConditionalOnClassService_ sẽ chỉ được load nếu class _OnRequiredClass_ tồn tại trong classpath, và config _ConditionalOnClass_ by value như sau
+```java
+package com.nguyendangkhoa25.condition.onclass;
+//...
+@Configuration
+@ConditionalOnClass(value = {OnRequiredClass.class})
+public class ConditionalOnClassConfiguration {
+    @Bean
+    public ConditionalOnClassService conditionalOnClassService() {
+        return new ConditionalOnClassService();
+    }
+}
+```
+Hoặc config by name như sau
+```java
+package com.nguyendangkhoa25.condition.onclass;
+//...
+@Configuration
+@ConditionalOnClass(name = "OnRequiredClass")
+public class ConditionalOnClassConfiguration {
+    @Bean
+    public ConditionalOnClassService conditionalOnClassService() {
+        return new ConditionalOnClassService();
+    }
+}
+```
+Tiếp theo tạo class _OnRequiredClass_  để condition trên được thoả mãn
+```java
+package com.nguyendangkhoa25.condition.onclass;
+public class OnRequiredClass {
+}
+```
+Và main class cho Spring Boot Application và chạy để kiểm tra kết quả
+```java
+package com.nguyendangkhoa25.condition.onclass;
+//...
+@SpringBootApplication
+public class SpringBootOnClassConditionalApp {
+    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(SpringBootOnClassConditionalApp.class, args);
+        Arrays.stream(applicationContext.getBeanDefinitionNames())
+                .filter(bean -> !bean.contains("org.springframework")
+                        && !bean.contains("springBootOnClassConditionalApp"))
+                .collect(Collectors.toList())
+                .forEach(beanName -> System.out.printf("Bean: %s%n", beanName));
+    }
+}
+```
+Trường hợp ngược lại, sử dụng _@ConditionalOnMissingClass_ để cho phép Spring inject beans khi mà class không tồn tại trong classpath
+Ví dụ: Chúng ta sẽ làm tương tự như ví dụ _@ConditionalOnClass_ ở trên nhưng sẽ không tạo class _OnRequiredClass_ như dưới đây
+```java
+package com.nguyendangkhoa25.condition.onmissingclass;
+//...
+@Configuration
+@ConditionalOnMissingClass(value = "com.nguyendangkhoa25.condition.onmissingclass.OnRequiredClass")
+public class ConditionalOnMissingClassConfiguration {
+}
+```
+Main class với _@SpringBootApplication_ annotation để kiểm tra bean được tạo
+```java
+package com.nguyendangkhoa25.condition.onmissingclass;
+//...
+@SpringBootApplication
+public class SpringBootOnMissingClassConditionalApp {
+    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(SpringBootOnMissingClassConditionalApp.class, args);
+        Arrays.stream(applicationContext.getBeanDefinitionNames())
+                .filter(bean -> !bean.contains("org.springframework")
+                        && !bean.contains("springBootOnMissingClassConditionalApp"))
+                .collect(Collectors.toList())
+                .forEach(beanName -> System.out.printf("Bean: %s%n", beanName));
+    }
+}
+```
+Tiếp theo chúng ta sẽ đến với 2 conditional annotations: _@ConditionalOnBean_ và _@ConditionalOnMissingBean_
 ### 2. @ConditionalOnBean và @ConditionalOnMissingBean
+Annotations _@ConditionalOnBean_ và _@ConditionalOnMissingBean_ được sử dụng để cài đặt Spring nếu một hoặc nhiều Beans khác tồn tại(_@ConditionalOnBean_) hoặc không tồn tại(_@ConditionalOnMissingBean_) trong classpath</br>
+Chúng ta có thể filter bằng name, type, value hoặc search để cài đặt như ví dụ sau đây.
+Đầu tiên tạo 1 bean _RequiredBean_ và sử dụng _@Component_ để autowire 
+```java
+package com.nguyendangkhoa25.condition.onbean;
+//...
+@Component
+public class RequiredBean {
+}
+```
+Tiếp theo ở class _SpringBootOnBeanConfig_ chúng ta sử dụng _@ConditionalOnBean_ để cài đặt bean "springBootOnBeanService" nếu bean "requiredBean" tồn tại như sau
+```java
+package com.nguyendangkhoa25.condition.onbean;
+//..
+@Configuration
+public class SpringBootOnBeanConfig {
+    @Bean
+    @ConditionalOnBean(value = RequiredBean.class)
+    public SpringBootOnBeanService springBootOnBeanService() {
+        return new SpringBootOnBeanService();
+    }
+}
+```
+Hoặc là sử dụng _@ConditionalOnMissingBean_ để cài đặt bean "springBootOnMissingBeanService" trong trường hợp "requiredBean" không tồn tại
+```java
+package com.nguyendangkhoa25.condition.onbean;
+//...
+@Configuration
+public class SpringBootOnBeanConfig {
+    @Bean
+    @ConditionalOnMissingBean(name = "requiredBean")
+    public SpringBootOnMissingBeanService springBootOnMissingBeanService() {
+        return new SpringBootOnMissingBeanService();
+    }
+}
+```
+Main class để kiểm tra kết quả 
+```java
+package com.nguyendangkhoa25.condition.onbean;
+//...
+@SpringBootApplication
+public class SpringBootOnBeanApp {
+    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(SpringBootOnBeanApp.class, args);
+        Arrays.stream(applicationContext.getBeanDefinitionNames())
+                .filter(bean -> !bean.contains("org.springframework")
+                        && !bean.contains("springBootOnBeanApp"))
+                .collect(Collectors.toList())
+                .forEach(beanName -> System.out.printf("Bean: %s%n", beanName));
+    }
+}
+```
 ### 3. @ConditionalOnProperty
+Sử dụng annotation này để cài đặt Spring Bean dựa vào một property nào đó</br>
+Ví dụ: Bean "springBootOnPropertyService" sẽ được Spring cài đặt dựa vào property "on.property.enabled" trong application.properties file
+```java
+package com.nguyendangkhoa25.condition.onproperty;
+//...
+@Configuration
+public class SpringBootOnPropertyConfig {
+    @Bean
+    @ConditionalOnProperty(prefix = "on.property", name = "enabled")
+    public SpringBootOnPropertyService springBootOnPropertyService() {
+        return new SpringBootOnPropertyService();
+    }
+}
+```
+Hoặc Bean "springBootOnPropertyValueService" sẽ chỉ được cài đặt nếu property "on.property.enabled" có value là "string-value" như dưới đây:
+```java
+package com.nguyendangkhoa25.condition.onproperty;
+//...
+@Configuration
+public class SpringBootOnPropertyConfig {
+    @Bean
+    @ConditionalOnProperty(prefix = "on.property", name = "enabled", havingValue = "string-value")
+    public SpringBootOnPropertyValueService springBootOnPropertyValueService() {
+        return new SpringBootOnPropertyValueService();
+    }
+}
+```
+Main class để kiểm tra kết quả
+```java
+package com.nguyendangkhoa25.condition.onproperty;
+//...
+@SpringBootApplication
+public class SpringBootOnPropertyApp {
+    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(SpringBootOnPropertyApp.class, args);
+        Arrays.stream(applicationContext.getBeanDefinitionNames())
+                .filter(bean -> !bean.contains("org.springframework")
+                        && !bean.contains("springBootOnPropertyApp"))
+                .collect(Collectors.toList())
+                .forEach(beanName -> System.out.printf("Bean: %s%n", beanName));
+    }
+}
+```
+Chú ý: Trong trường hợp property có value dạng true/false thì nếu set value là "false" thì Spring sẽ không load bean nếu không chỉ rõ value cụ thể
 ### 4. @ConditionalOnResource
+Annotation này được sử dụng để cài đặt bean dựa vào sự tồn tại của 1 resource trong classpath
+Ví dụ: Chúng ta sẽ chỉ cài đặt bean Log4jService trong trường hợp classpath có tồn tại file log4j.properties như sau
+```java
+package com.nguyendangkhoa25.condition.onresource;
+//...
+@Configuration
+public class SpringBootOnResourceConfig {
+    @Bean
+    @ConditionalOnResource(resources = { "log4j.properties" })
+    public Log4jService log4jService() {
+        return new Log4jService();
+    }
+}
+```
+Main class để kiểm tra kết quả 
+```java
+package com.nguyendangkhoa25.condition.onresource;
+//...
+@SpringBootApplication
+public class SpringBootOnResourceApp {
+    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(SpringBootOnResourceApp.class, args);
+        Arrays.stream(applicationContext.getBeanDefinitionNames())
+                .filter(bean -> bean.contains("log4jService")).collect(Collectors.toList())
+                .forEach(beanName -> System.out.printf("Bean: %s loaded", beanName));
+    }
+}
+```
 ### 5. @ConditionalOnWebApplication và @ConditionalOnNotWebApplication
 ### 6. @ConditionalExpression
 ### 7. @Conditional
