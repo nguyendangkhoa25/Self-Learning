@@ -302,6 +302,52 @@ public class SpringBootConditionalOnWebConfig {
 ```
 Thì bean "notWebModule" sẽ chỉ được cài đặt vào application context nếu chúng ta delete dependency spring-boot-starter-web
 ### 6. @ConditionalExpression
+Annotation _@ConditionalExpression_ được sử dụng khi chúng ta muốn cài đặt bean/configuration dựa trên kết quả của một SpEL(Spring Expression Language) expresstion</br>
+Cùng tìm hiểu về _@ConditionalExpression_ qua ví dụ sau:
+Đầu tiên tạo class ExpressionModule, class này được sử dụng để khởi tạo bean khi run application
+```java
+package com.nguyendangkhoa25.condition.expression;
+public class ExpressionModule {
+}
+```
+Chúng ta sẽ chỉ tạo bean "expressionModule" khi property "on.expression.enabled" có giá trị "true"
+```java
+package com.nguyendangkhoa25.condition.expression;
+//...
+@Configuration
+public class SpringBootConditionalOnExpressionConfig {
+    @Bean
+    @ConditionalOnExpression(value = "${on.expression.enabled:true}")
+    public ExpressionModule expressionModule() {
+        return new ExpressionModule();
+    }
+}
+```
+File application.properties khai báo properties ở trên 
+```text
+on.expression.enabled=true
+```
+Và main class để kiểm tra
+```java
+package com.nguyendangkhoa25.condition.expression;
+//...
+@SpringBootApplication
+public class SpringBootConditionalOnExpressionApp {
+    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(SpringBootConditionalOnExpressionApp.class, args);
+        Arrays.stream(applicationContext.getBeanDefinitionNames())
+                .filter(bean -> !bean.contains("org.springframework")
+                        && !bean.contains("springBootConditionalOnExpression"))
+                .collect(Collectors.toList())
+                .forEach(beanName -> System.out.printf("Bean: %s%n", beanName));
+    }
+}
+```
+Khi chạy main class chúng ta sẽ thấy "expressionModule" được in ra trong console. Bây giờ nếu ta thay đổi giá trị của property thành false thì bean sẽ không được cài đặt vào application context
+```text
+on.expression.enabled=false
+```
 ### 7. @Conditional
 ## 5. @AutoConfigureBefore và @AutoConfigureAfter
 ## 6. @AutoConfigureOrder
