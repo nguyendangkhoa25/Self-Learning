@@ -242,6 +242,65 @@ public class SpringBootOnResourceApp {
 }
 ```
 ### 5. @ConditionalOnWebApplication và @ConditionalOnNotWebApplication
+2 Annotations _@ConditionalOnWebApplication_ và _@ConditionalOnNotWebApplication_ cho phép Spring cài đặt bean trong trường hợp application là một web-application(_@ConditionalOnWebApplication_) hoặc không phải là một web-application(_@ConditionalOnNotWebApplication_)</br>
+Một web application là một application bất kỳ có sử dụng một Spring _WebApplicationContext_, định nghĩa một session scope hoặc có một _StandardServletEnvironment_
+Xem xét ví dụ dưới đây để thấy _@ConditionalOnWebApplication_ và _@ConditionalOnNotWebApplication_ hoạt động như thế nào thông qua việc cài đặt bean WebModule </br>
+```java
+package com.nguyendangkhoa25.condition.onweb;
+public class WebModule {
+}
+```
+Tạo một configuration class như sau:
+```java
+package com.nguyendangkhoa25.condition.onweb;
+//...
+@Configuration
+public class SpringBootConditionalOnWebConfig {
+    @Bean
+    @ConditionalOnWebApplication
+    public WebModule webModule() {
+        return new WebModule();
+    }
+}
+```
+Thêm vào dependency spring-boot-starter-web
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+Cuối cùng là main class để kiểm tra kết quả: 
+```java
+package com.nguyendangkhoa25.condition.onweb;
+//...
+@SpringBootApplication
+public class SpringBootConditionalOnWebApp {
+    private static ApplicationContext applicationContext;
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(SpringBootConditionalOnWebApp.class, args);
+        Arrays.stream(applicationContext.getBeanDefinitionNames())
+                .filter(bean -> !bean.contains("org.springframework")
+                        && !bean.contains("springBootConditionalOnWebApp"))
+                .collect(Collectors.toList())
+                .forEach(beanName -> System.out.printf("Bean: %s%n", beanName));
+    }
+}
+```
+Tương tự cho annotation _@ConditionalOnNotWebApplication_  
+```java
+package com.nguyendangkhoa25.condition.onweb;
+//...
+@Configuration
+public class SpringBootConditionalOnWebConfig {
+    @Bean
+    @ConditionalOnNotWebApplication
+    public NotWebModule notWebModule() {
+        return new NotWebModule();
+    }
+}
+```
+Thì bean "notWebModule" sẽ chỉ được cài đặt vào application context nếu chúng ta delete dependency spring-boot-starter-web
 ### 6. @ConditionalExpression
 ### 7. @Conditional
 ## 5. @AutoConfigureBefore và @AutoConfigureAfter
