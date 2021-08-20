@@ -349,9 +349,11 @@ Khi chạy main class chúng ta sẽ thấy "expressionModule" được in ra tr
 on.expression.enabled=false
 ```
 ### 7. @Conditional
-## 5. @AutoConfigureBefore và @AutoConfigureAfter
-## 6. @AutoConfigureOrder
-## 7. Kết luận
+Trong một số trường chúng ta có một số condition phức tạp mà sử dụng các pre-defined annotations của spring không giải quyết được thì chúng ta có thể tạo một class để custom condition và sử dụng annotation _@Conditional_ để cho Spring sử dụng custom class này
+Cùng xem xét ví dụ sau:
+
+
+## 8. Kết luận
 
 
 
