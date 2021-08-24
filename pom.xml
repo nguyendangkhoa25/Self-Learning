@@ -16,6 +16,7 @@
   <modules>
     <module>Spring-Component-Scan</module>
     <module>Spring-Boot-Annotation</module>
+    <module>Bootstrap-Simple-Application</module>
   </modules>
   <properties>
     <java.version>16</java.version>
