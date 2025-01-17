@@ -7,12 +7,12 @@
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.5.3</version>
   </parent>
-  <groupId>com.nguyendangkhoa25.sbt</groupId>
-  <artifactId>Spring-Boot-Training</artifactId>
+  <groupId>com.nguyendangkhoa25.learn</groupId>
+  <artifactId>Self Learning Project</artifactId>
   <packaging>pom</packaging>
   <version>1.0</version>
-  <name>Spring Boot Training Project</name>
-  <url>https://github.com/nguyendangkhoa25/Spring-Boot-Training</url>
+  <name>Self Learning Project</name>
+  <url>https://github.com/nguyendangkhoa25/Self-Learning</url>
   <modules>
     <module>Spring-Component-Scan</module>
     <module>Spring-Boot-Annotation</module>
