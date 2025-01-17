@@ -13,11 +13,6 @@
   <version>1.0</version>
   <name>Self Learning Project</name>
   <url>https://github.com/nguyendangkhoa25/Self-Learning</url>
-  <modules>
-    <module>Spring-Component-Scan</module>
-    <module>Spring-Boot-Annotation</module>
-    <module>Bootstrap-Simple-Application</module>
-  </modules>
   <properties>
     <java.version>16</java.version>
   </properties>
